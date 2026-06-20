@@ -1,0 +1,487 @@
+package net.dshbwlto.createbionics.entity.custom;
+
+import com.simibubi.create.AllItems;
+import com.simibubi.create.AllSoundEvents;
+import net.dshbwlto.createbionics.entity.api.AbstractRobot;
+import net.dshbwlto.createbionics.entity.client.anole.AnoleMarkings;
+import net.dshbwlto.createbionics.entity.client.anole.AnoleVariant;
+import net.dshbwlto.createbionics.item.BionicsItems;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
+import net.minecraft.world.entity.ai.navigation.WallClimberNavigation;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.Bee;
+import net.minecraft.world.entity.monster.CaveSpider;
+import net.minecraft.world.entity.monster.Silverfish;
+import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
+
+@Mod.EventBusSubscriber
+public class AnoleEntity extends AbstractRobot {
+    public boolean climbing = false;
+
+    int maxHealth = 5;
+
+    public final AnimationState idleAnimationState = new AnimationState();
+    private int idleAnimationTimeout = 0;
+
+    public final AnimationState sitDownAnimationState = new AnimationState();
+    public final AnimationState sitPoseAnimationState = new AnimationState();
+    public final AnimationState sitUpAnimationState = new AnimationState();
+
+    public static final EntityDataAccessor<Integer> MARKING_MAP =
+            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.INT);
+
+    private static final EntityDataAccessor<Boolean> HAT1 =
+            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HAT2 =
+            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HAT3 =
+            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HAT4 =
+            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HAT5 =
+            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HAT6 =
+            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HAT7 =
+            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HAT8 =
+            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> HAT9 =
+            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
+
+    public AnoleEntity(EntityType<? extends AbstractRobot> entityType, Level level) {
+        super(entityType, level);
+    }
+
+    @Override
+    protected void registerGoals() {
+        this.goalSelector.addGoal(0, new FloatGoal(this) {
+            @Override
+            public boolean canUse() {
+                return super.canUse() && isFueled();
+            }
+        });
+
+        this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
+
+        this.goalSelector.addGoal(4, new FollowOwnerGoal(this, 1.0d, 10f, 5f, false));
+        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0D) {
+            @Override
+            public boolean canUse() {
+                return super.canUse() && isTame() && isFueled();
+            }
+        });
+
+        this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 4f) {
+            @Override
+            public boolean canUse() {
+                return super.canUse() && isTame() && isFueled();
+            }
+        });
+        this.goalSelector.addGoal(7, new RandomLookAroundGoal(this) {
+            @Override
+            public boolean canUse() {
+                return super.canUse() && isTame() && isFueled();
+            }
+        });
+    }
+
+    @SubscribeEvent
+    public static void scareEntity(EntityJoinLevelEvent event) {
+        if (event.getEntity() instanceof Spider spider) {
+            spider.goalSelector.addGoal(1, new AvoidEntityGoal(spider, AnoleEntity.class, 6.0F, (double)1.0F, 1.2));
+        }
+        if (event.getEntity() instanceof CaveSpider caveSpider) {
+            caveSpider.goalSelector.addGoal(1, new AvoidEntityGoal(caveSpider, AnoleEntity.class, 6.0F, (double)1.0F, 1.2));
+        }
+        if (event.getEntity() instanceof Silverfish silverfish) {
+            silverfish.goalSelector.addGoal(1, new AvoidEntityGoal(silverfish, AnoleEntity.class, 6.0F, (double)1.0F, 1.2));
+        }
+        if (event.getEntity() instanceof Bee bee) {
+            bee.goalSelector.addGoal(1, new AvoidEntityGoal(bee, AnoleEntity.class, 6.0F, (double)1.0F, 1.2));;
+        }
+    }
+
+    protected PathNavigation createNavigation(Level level) {
+        return new WallClimberNavigation(this, level);
+    }
+
+    public static AttributeSupplier.Builder createAttributes() {
+        return Animal.createLivingAttributes()
+                .add(Attributes.MAX_HEALTH, 5D)
+                .add(Attributes.MOVEMENT_SPEED, 0.4)
+                .add(Attributes.ATTACK_DAMAGE, 2f)
+                .add(Attributes.FOLLOW_RANGE, 24D);
+    }
+
+    @Override
+    public boolean isFood(ItemStack stack) {
+        return stack.is(Items.BARRIER);
+    }
+
+    @Nullable
+    @Override
+    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
+        return null;
+    }
+
+    @Override
+    protected @Nullable SoundEvent getDeathSound() {
+        return SoundEvents.ITEM_BREAK;
+    }
+
+    @Override
+    protected @Nullable SoundEvent getHurtSound(DamageSource damageSource) {
+        return SoundEvents.ANVIL_PLACE;
+    }
+
+    public void aiStep() {
+        if (this.level().isClientSide && isFueled() && getFuel() > 100) {
+            this.level().addParticle(ParticleTypes.SMOKE, this.getRandomX(0.5F), this.getRandomY(), this.getRandomZ(0.5F), 0.0F, 0.0F, 0.0F);
+        }
+        super.aiStep();
+    }
+
+    @Override
+    public boolean fireImmune() {
+        return true;
+    }
+
+    /* ANIMATIONS */
+    private void setupAnimationStates() {
+        if (this.idleAnimationTimeout <= 0) {
+            this.idleAnimationTimeout = 40;
+            this.idleAnimationState.start(this.tickCount);
+        } else {
+            --this.idleAnimationTimeout;
+        }
+
+        if (this.isVisuallySitting()) {
+            this.sitUpAnimationState.stop();
+            if (this.isVisuallySittingDown()) {
+                this.sitDownAnimationState.startIfStopped(this.tickCount);
+                this.sitPoseAnimationState.stop();
+            } else {
+                this.sitDownAnimationState.stop();
+                this.sitPoseAnimationState.startIfStopped(this.tickCount);
+            }
+        } else {
+            this.sitDownAnimationState.stop();
+            this.sitPoseAnimationState.stop();
+            this.sitUpAnimationState.animateWhen(this.isInPoseTransition() && this.getPoseTime() >= 0L, this.tickCount);
+        }
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        if (this.level().isClientSide()) {
+            this.setupAnimationStates();
+        }
+
+        if (isFueled()) {
+            playSoundScape(1, 1);
+        }
+
+        if (!isSitting() && !isPassenger() && hasBlazeCake()) {
+            if (getFuel() > 0) {
+                setFuel(getFuel() - 1);
+            }
+        }
+
+        if (this.horizontalCollision) {
+            Vec3 initialVec = this.getDeltaMovement();
+            Vec3 climbVec = new Vec3(initialVec.x, 0.2D, initialVec.z);
+            this.setDeltaMovement(climbVec.scale(0.96D));
+        }
+    }
+
+    /* RIGHT CLICKING */
+    @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack itemStack = player.getItemInHand(hand);
+
+        if (!isTame() && getMainHandItem().isEmpty()) {
+            if (this.level().isClientSide()) {
+                return InteractionResult.SUCCESS;
+            } else {
+                super.tame(player);
+                this.navigation.recomputePath();
+                this.setTarget(null);
+                this.level().broadcastEntityEvent(this, (byte) 7);
+                return InteractionResult.SUCCESS;
+            }
+        }
+
+        if (isTame() && isOwnedBy(player)) {
+            if (itemStack.is(Items.COPPER_INGOT)
+                    || itemStack.is(AllItems.ANDESITE_ALLOY.asItem())
+                    || itemStack.is(AllItems.BRASS_INGOT.asItem())
+                    || itemStack.is(Items.NETHERITE_INGOT)
+                    || itemStack.is(Items.SPONGE)
+                    || itemStack.is(Items.WET_SPONGE)) {
+                if (player.isShiftKeyDown()) {
+                    if (itemStack.is(AllItems.ANDESITE_ALLOY.asItem()) && getHealth() < maxHealth) {
+                        heal(1);
+                    }
+                } else {
+                    if (!itemStack.is(Items.SPONGE) && !itemStack.is(Items.WET_SPONGE)) {
+                        dropIngot(getVariant());
+                    }
+                    setTypeVariant(itemStack);
+                }
+                if (level().isClientSide) {
+                    return InteractionResult.SUCCESS;
+                } else if (!itemStack.is(Items.SPONGE) && !itemStack.is(Items.WET_SPONGE)) {
+                    itemStack.shrink(1);
+                }
+            } else if (itemStack.is(Items.REDSTONE)
+                    || itemStack.is(Items.GOLD_INGOT)
+                    || itemStack.is(Items.DIAMOND)
+                    || itemStack.is(Items.BRUSH)) {
+                dropMaterial(getMarkings());
+                setTypeMarking(itemStack);
+                if (!itemStack.is(Items.BRUSH)) {
+                    itemStack.shrink(1);
+                }
+            } else if (itemStack.is(AllItems.WRENCH.asItem())) {
+                if (getVariant() != AnoleVariant.COPPPER
+                        && getVariant() != AnoleVariant.EXPOSED
+                        && getVariant() != AnoleVariant.WEATHERED
+                        && getVariant() != AnoleVariant.OXIDIZED) {
+                    dropIngot(getVariant());
+                }
+                dropMaterial(getMarkings());
+                spawnAtLocation(BionicsItems.ROBOT_BUILDER);
+                remove(RemovalReason.DISCARDED);
+            } else if (itemStack.is(AllItems.CREATIVE_BLAZE_CAKE.asItem())) {
+                if (hasBlazeCake()) {
+                    entityData.set(CREATIVE_BLAZE_CAKE, false);
+                } else {
+                    setFuel(10000);
+                    entityData.set(CREATIVE_BLAZE_CAKE, true);
+                    playSound(AllSoundEvents.BLAZE_MUNCH.getMainEvent());
+                }
+            } else if (itemStack.is(Items.COAL) || itemStack.is(Items.CHARCOAL)){
+                setFuel(10000);
+                playSound(AllSoundEvents.BLAZE_MUNCH.getMainEvent());
+            } else {
+                updateCommand(player);
+                return InteractionResult.SUCCESS;
+            }
+        }
+
+        return super.mobInteract(player, hand);
+    }
+
+    @Override
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.entityData.define(MARKING_MAP, 0);
+
+        this.entityData.define(HAT1, true);
+        this.entityData.define(HAT2, false);
+        this.entityData.define(HAT3, false);
+        this.entityData.define(HAT4, false);
+        this.entityData.define(HAT5, false);
+        this.entityData.define(HAT6, false);
+        this.entityData.define(HAT7, false);
+        this.entityData.define(HAT8, false);
+        this.entityData.define(HAT9, false);
+    }
+
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag compound) {
+        super.addAdditionalSaveData(compound);
+        compound.putInt("Marking", this.getTypeMarkings());
+
+        compound.putBoolean("Hat1", hat1());
+        compound.putBoolean("Hat2", hat2());
+        compound.putBoolean("Hat3", hat3());
+        compound.putBoolean("Hat4", hat4());
+        compound.putBoolean("Hat5", hat5());
+        compound.putBoolean("Hat6", hat6());
+        compound.putBoolean("Hat7", hat7());
+        compound.putBoolean("Hat8", hat8());
+        compound.putBoolean("Hat9", hat9());
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag compound) {
+        super.readAdditionalSaveData(compound);
+        this.entityData.set(MARKING_MAP, compound.getInt("Marking"));
+
+        this.entityData.set(HAT1, compound.getBoolean("Hat1"));
+        this.entityData.set(HAT2, compound.getBoolean("Hat2"));
+        this.entityData.set(HAT3, compound.getBoolean("Hat3"));
+        this.entityData.set(HAT4, compound.getBoolean("Hat4"));
+        this.entityData.set(HAT5, compound.getBoolean("Hat5"));
+        this.entityData.set(HAT6, compound.getBoolean("Hat6"));
+        this.entityData.set(HAT7, compound.getBoolean("Hat7"));
+        this.entityData.set(HAT8, compound.getBoolean("Hat8"));
+        this.entityData.set(HAT9, compound.getBoolean("Hat9"));
+    }
+
+    //VARIANT//
+
+    private void setTypeVariant(ItemStack itemStack) {
+        if (itemStack.getItem() == Items.COPPER_INGOT &&
+                getVariant() != AnoleVariant.COPPPER &&
+                getVariant() != AnoleVariant.EXPOSED &&
+                getVariant() != AnoleVariant.WEATHERED &&
+                getVariant() != AnoleVariant.OXIDIZED) {
+            setVariant(AnoleVariant.COPPPER);
+        } else if (itemStack.is(AllItems.ANDESITE_ALLOY.asItem())
+                && getVariant() != AnoleVariant.ANDESITE) {
+            setVariant(AnoleVariant.ANDESITE);
+        } else if (itemStack.is(AllItems.BRASS_INGOT.asItem())
+                && getVariant() != AnoleVariant.BRASS) {
+            setVariant(AnoleVariant.BRASS);
+        } else if (itemStack.is(Items.NETHERITE_INGOT)
+                && getVariant() != AnoleVariant.NETHERITE) {
+            setVariant(AnoleVariant.NETHERITE);
+        } else if (itemStack.is(Items.WET_SPONGE)) {
+            if (getVariant() == AnoleVariant.COPPPER) {
+                setVariant(AnoleVariant.EXPOSED);
+            } else if (getVariant() == AnoleVariant.EXPOSED) {
+                setVariant(AnoleVariant.WEATHERED);
+            } else if (getVariant() == AnoleVariant.WEATHERED) {
+                setVariant(AnoleVariant.OXIDIZED);
+            }
+        } else if (itemStack.is(Items.SPONGE) && (getVariant() == AnoleVariant.EXPOSED
+                || getVariant() == AnoleVariant.WEATHERED
+                || getVariant() == AnoleVariant.OXIDIZED)) {
+            setVariant(AnoleVariant.COPPPER);
+        }
+    }
+
+    private void setTypeMarking(ItemStack itemStack) {
+        if (itemStack.is(Items.REDSTONE)
+                && getMarkings() != AnoleMarkings.REDSTONE) {
+            setMarking(AnoleMarkings.REDSTONE);
+        } else if (itemStack.is(Items.GOLD_INGOT) && getMarkings() != AnoleMarkings.GOLD) {
+            setMarking(AnoleMarkings.GOLD);
+        } else if (itemStack.is(Items.DIAMOND) && getMarkings() != AnoleMarkings.DIAMOND) {
+            setMarking(AnoleMarkings.DIAMOND);
+        } else if (itemStack.is(Items.BRUSH) && getMarkings() != AnoleMarkings.DEFAULT) {
+            setMarking(AnoleMarkings.DEFAULT);
+        }
+    }
+
+    private void dropIngot(AnoleVariant variant) {
+        if (getVariant() == AnoleVariant.BRASS) {
+            spawnAtLocation(new ItemStack(AllItems.BRASS_INGOT.asItem()));
+        } else if (getVariant() == AnoleVariant.COPPPER
+                || getVariant() == AnoleVariant.EXPOSED
+                || getVariant() == AnoleVariant.WEATHERED
+                || getVariant() == AnoleVariant.OXIDIZED) {
+            spawnAtLocation(new ItemStack(Items.COPPER_INGOT));
+        } else if (getVariant() == AnoleVariant.ANDESITE) {
+            spawnAtLocation(new ItemStack(AllItems.ANDESITE_ALLOY.asItem()));
+        } else if (getVariant() == AnoleVariant.NETHERITE) {
+            spawnAtLocation(new ItemStack(Items.NETHERITE_INGOT));
+        }
+    }
+
+    private void dropMaterial(AnoleMarkings markings) {
+        if (getMarkings() == AnoleMarkings.GOLD) {
+            spawnAtLocation(new ItemStack(Items.GOLD_INGOT));
+        } else if (getMarkings() == AnoleMarkings.REDSTONE) {
+            spawnAtLocation(new ItemStack(Items.REDSTONE));
+        } else if (getMarkings() == AnoleMarkings.DIAMOND) {
+            spawnAtLocation(new ItemStack(Items.DIAMOND));
+        }
+    }
+
+    private int getTypeVariant() {
+        return this.entityData.get(VARIANT);
+    }
+
+    public int getTypeMarkings() {
+        return this.entityData.get(MARKING_MAP);
+    }
+
+    public AnoleVariant getVariant() {
+        return AnoleVariant.byId(this.getTypeVariant() & 255);
+    }
+
+    public AnoleMarkings getMarkings() {
+        return AnoleMarkings.byId(this.getTypeMarkings() & 255);
+    }
+
+    public void setVariant(AnoleVariant variant) {
+        this.entityData.set(VARIANT, variant.getId() & 255);
+    }
+
+    public void setMarking(AnoleMarkings marking) {
+        this.entityData.set(MARKING_MAP, marking.getId() & 255);
+    }
+
+    //Hats//
+
+    public boolean hat1() {
+        String s = ChatFormatting.stripFormatting(this.getName().getString());
+        return ("Distinguished Gentleman".equals(s) || "Bill".equals(s));
+    }
+    public boolean hat2() {
+        String s = ChatFormatting.stripFormatting(this.getName().getString());
+        return "Timmy".equals(s);
+    }
+    public boolean hat3() {
+        String s = ChatFormatting.stripFormatting(this.getName().getString());
+        return "Unicorn".equals(s);
+    }
+    public boolean hat4() {
+        String s = ChatFormatting.stripFormatting(this.getName().getString());
+        return ("Legend".equals(s) || "Techno".equals(s) || "Alex".equals(s));
+    }
+    public boolean hat5() {
+        String s = ChatFormatting.stripFormatting(this.getName().getString());
+        return "Stampy".equals(s);
+    }
+    public boolean hat6() {
+        String s = ChatFormatting.stripFormatting(this.getName().getString());
+        return ("Doug".equals(s) || "Dimmadome".equals(s) || "Mayor".equals(s));
+    }
+    public boolean hat7() {
+        String s = ChatFormatting.stripFormatting(this.getName().getString());
+        return "Cat in the Hat".equals(s);
+    }
+    public boolean hat8() {
+        String s = ChatFormatting.stripFormatting(this.getName().getString());
+        return "Sherlock".equals(s);
+    }
+    public boolean hat9() {
+        String s = ChatFormatting.stripFormatting(this.getName().getString());
+        return "Scallywag".equals(s);
+    }
+}

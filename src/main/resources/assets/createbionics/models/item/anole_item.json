@@ -1,0 +1,24 @@
+{
+  "parent": "minecraft:item/handheld",
+  "loader": "neoforge:separate_transforms",
+  "base": {
+    "parent": "createbionics:item/anole_item_handheld"
+  },
+  "perspectives": {
+    "gui": {
+      "parent": "createbionics:item/anole_item_gui"
+    },
+    "ground": {
+      "parent": "createbionics:item/anole_item_gui"
+    },
+    "fixed": {
+      "parent": "createbionics:item/anole_item_gui"
+    },
+    "firstperson_righthand": {
+      "parent": "createbionics:item/anole_item_gui"
+    },
+    "firstperson_lefthand": {
+      "parent": "createbionics:item/anole_item_gui"
+    }
+  }
+}

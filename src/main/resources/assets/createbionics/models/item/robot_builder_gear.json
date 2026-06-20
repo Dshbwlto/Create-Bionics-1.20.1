@@ -1,0 +1,8 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "create:item/wrench/gear",
+	"textures": {
+		"5": "createbionics:item/robot_builder",
+		"particle": "create:item/wrench"
+	}
+}
