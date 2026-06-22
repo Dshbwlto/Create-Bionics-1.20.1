@@ -21,15 +21,17 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.minecraftforge.common.ForgeSpawnEggItem;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public class AnoleItem extends SpawnEggItem {
+public class AnoleItem extends ForgeSpawnEggItem {
 
-    public AnoleItem(EntityType<? extends Mob> defaultType, int backgroundColor, int highlightColor, Item.Properties properties) {
+    public AnoleItem(Supplier<? extends EntityType<? extends Mob>> defaultType, int backgroundColor, int highlightColor, Item.Properties properties) {
         super(defaultType, backgroundColor, highlightColor, properties);
     }
     @Override

@@ -56,7 +56,7 @@ public class AnoleEntity extends AbstractRobot {
 
     public static final EntityDataAccessor<Integer> MARKING_MAP =
             SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.INT);
-
+/*
     private static final EntityDataAccessor<Boolean> HAT1 =
             SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HAT2 =
@@ -75,6 +75,7 @@ public class AnoleEntity extends AbstractRobot {
             SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> HAT9 =
             SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
+ */
 
     public AnoleEntity(EntityType<? extends AbstractRobot> entityType, Level level) {
         super(entityType, level);
@@ -306,7 +307,7 @@ public class AnoleEntity extends AbstractRobot {
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(MARKING_MAP, 0);
-
+        /*
         this.entityData.define(HAT1, true);
         this.entityData.define(HAT2, false);
         this.entityData.define(HAT3, false);
@@ -316,6 +317,7 @@ public class AnoleEntity extends AbstractRobot {
         this.entityData.define(HAT7, false);
         this.entityData.define(HAT8, false);
         this.entityData.define(HAT9, false);
+         */
     }
 
 
@@ -339,7 +341,7 @@ public class AnoleEntity extends AbstractRobot {
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         this.entityData.set(MARKING_MAP, compound.getInt("Marking"));
-
+/*
         this.entityData.set(HAT1, compound.getBoolean("Hat1"));
         this.entityData.set(HAT2, compound.getBoolean("Hat2"));
         this.entityData.set(HAT3, compound.getBoolean("Hat3"));
@@ -349,6 +351,7 @@ public class AnoleEntity extends AbstractRobot {
         this.entityData.set(HAT7, compound.getBoolean("Hat7"));
         this.entityData.set(HAT8, compound.getBoolean("Hat8"));
         this.entityData.set(HAT9, compound.getBoolean("Hat9"));
+ */
     }
 
     //VARIANT//
