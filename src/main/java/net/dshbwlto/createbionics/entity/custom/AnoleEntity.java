@@ -2,6 +2,7 @@ package net.dshbwlto.createbionics.entity.custom;
 
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllSoundEvents;
+import net.dshbwlto.createbionics.entity.BionicsEntities;
 import net.dshbwlto.createbionics.entity.api.AbstractRobot;
 import net.dshbwlto.createbionics.entity.client.anole.AnoleMarkings;
 import net.dshbwlto.createbionics.entity.client.anole.AnoleVariant;
@@ -30,6 +31,7 @@ import net.minecraft.world.entity.monster.CaveSpider;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -56,26 +58,6 @@ public class AnoleEntity extends AbstractRobot {
 
     public static final EntityDataAccessor<Integer> MARKING_MAP =
             SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.INT);
-/*
-    private static final EntityDataAccessor<Boolean> HAT1 =
-            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> HAT2 =
-            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> HAT3 =
-            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> HAT4 =
-            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> HAT5 =
-            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> HAT6 =
-            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> HAT7 =
-            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> HAT8 =
-            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> HAT9 =
-            SynchedEntityData.defineId(AnoleEntity.class, EntityDataSerializers.BOOLEAN);
- */
 
     public AnoleEntity(EntityType<? extends AbstractRobot> entityType, Level level) {
         super(entityType, level);
@@ -92,7 +74,12 @@ public class AnoleEntity extends AbstractRobot {
 
         this.goalSelector.addGoal(1, new SitWhenOrderedToGoal(this));
 
-        this.goalSelector.addGoal(4, new FollowOwnerGoal(this, 1.0d, 10f, 5f, false));
+        this.goalSelector.addGoal(4, new FollowOwnerGoal(this, 1.0d, 10f, 5f, false) {
+            @Override
+            public boolean canUse() {
+                return super.canUse() && isFueled();
+            }
+        });
         this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0D) {
             @Override
             public boolean canUse() {
@@ -150,7 +137,7 @@ public class AnoleEntity extends AbstractRobot {
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
-        return null;
+        return BionicsEntities.ANOLE.get().create(level);
     }
 
     @Override
@@ -212,7 +199,7 @@ public class AnoleEntity extends AbstractRobot {
             playSoundScape(1, 1);
         }
 
-        if (!isSitting() && !isPassenger() && hasBlazeCake()) {
+        if (!isSitting() && !isPassenger() && !hasBlazeCake()) {
             if (getFuel() > 0) {
                 setFuel(getFuel() - 1);
             }
@@ -238,27 +225,19 @@ public class AnoleEntity extends AbstractRobot {
                 this.navigation.recomputePath();
                 this.setTarget(null);
                 this.level().broadcastEntityEvent(this, (byte) 7);
+
                 return InteractionResult.SUCCESS;
             }
         }
 
         if (isTame() && isOwnedBy(player)) {
-            if (itemStack.is(Items.COPPER_INGOT)
-                    || itemStack.is(AllItems.ANDESITE_ALLOY.asItem())
+            if (itemStack.is(AllItems.ANDESITE_ALLOY.asItem())
                     || itemStack.is(AllItems.BRASS_INGOT.asItem())
                     || itemStack.is(Items.NETHERITE_INGOT)
                     || itemStack.is(Items.SPONGE)
                     || itemStack.is(Items.WET_SPONGE)) {
-                if (player.isShiftKeyDown()) {
-                    if (itemStack.is(AllItems.ANDESITE_ALLOY.asItem()) && getHealth() < maxHealth) {
-                        heal(1);
-                    }
-                } else {
-                    if (!itemStack.is(Items.SPONGE) && !itemStack.is(Items.WET_SPONGE)) {
-                        dropIngot(getVariant());
-                    }
-                    setTypeVariant(itemStack);
-                }
+                dropIngot(getVariant());
+                setTypeVariant(itemStack);
                 if (level().isClientSide) {
                     return InteractionResult.SUCCESS;
                 } else if (!itemStack.is(Items.SPONGE) && !itemStack.is(Items.WET_SPONGE)) {
@@ -281,7 +260,7 @@ public class AnoleEntity extends AbstractRobot {
                     dropIngot(getVariant());
                 }
                 dropMaterial(getMarkings());
-                spawnAtLocation(BionicsItems.ROBOT_BUILDER);
+                spawnAtLocation(anoleItem());
                 remove(RemovalReason.DISCARDED);
             } else if (itemStack.is(AllItems.CREATIVE_BLAZE_CAKE.asItem())) {
                 if (hasBlazeCake()) {
@@ -303,21 +282,15 @@ public class AnoleEntity extends AbstractRobot {
         return super.mobInteract(player, hand);
     }
 
+    public Item anoleItem() {
+        ItemStack anole = new ItemStack(BionicsItems.ANOLE.get());
+        return anole.getItem();
+    }
+
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(MARKING_MAP, 0);
-        /*
-        this.entityData.define(HAT1, true);
-        this.entityData.define(HAT2, false);
-        this.entityData.define(HAT3, false);
-        this.entityData.define(HAT4, false);
-        this.entityData.define(HAT5, false);
-        this.entityData.define(HAT6, false);
-        this.entityData.define(HAT7, false);
-        this.entityData.define(HAT8, false);
-        this.entityData.define(HAT9, false);
-         */
     }
 
 
@@ -325,33 +298,12 @@ public class AnoleEntity extends AbstractRobot {
     public void addAdditionalSaveData(CompoundTag compound) {
         super.addAdditionalSaveData(compound);
         compound.putInt("Marking", this.getTypeMarkings());
-
-        compound.putBoolean("Hat1", hat1());
-        compound.putBoolean("Hat2", hat2());
-        compound.putBoolean("Hat3", hat3());
-        compound.putBoolean("Hat4", hat4());
-        compound.putBoolean("Hat5", hat5());
-        compound.putBoolean("Hat6", hat6());
-        compound.putBoolean("Hat7", hat7());
-        compound.putBoolean("Hat8", hat8());
-        compound.putBoolean("Hat9", hat9());
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag compound) {
         super.readAdditionalSaveData(compound);
         this.entityData.set(MARKING_MAP, compound.getInt("Marking"));
-/*
-        this.entityData.set(HAT1, compound.getBoolean("Hat1"));
-        this.entityData.set(HAT2, compound.getBoolean("Hat2"));
-        this.entityData.set(HAT3, compound.getBoolean("Hat3"));
-        this.entityData.set(HAT4, compound.getBoolean("Hat4"));
-        this.entityData.set(HAT5, compound.getBoolean("Hat5"));
-        this.entityData.set(HAT6, compound.getBoolean("Hat6"));
-        this.entityData.set(HAT7, compound.getBoolean("Hat7"));
-        this.entityData.set(HAT8, compound.getBoolean("Hat8"));
-        this.entityData.set(HAT9, compound.getBoolean("Hat9"));
- */
     }
 
     //VARIANT//
@@ -403,11 +355,6 @@ public class AnoleEntity extends AbstractRobot {
     private void dropIngot(AnoleVariant variant) {
         if (getVariant() == AnoleVariant.BRASS) {
             spawnAtLocation(new ItemStack(AllItems.BRASS_INGOT.asItem()));
-        } else if (getVariant() == AnoleVariant.COPPPER
-                || getVariant() == AnoleVariant.EXPOSED
-                || getVariant() == AnoleVariant.WEATHERED
-                || getVariant() == AnoleVariant.OXIDIZED) {
-            spawnAtLocation(new ItemStack(Items.COPPER_INGOT));
         } else if (getVariant() == AnoleVariant.ANDESITE) {
             spawnAtLocation(new ItemStack(AllItems.ANDESITE_ALLOY.asItem()));
         } else if (getVariant() == AnoleVariant.NETHERITE) {

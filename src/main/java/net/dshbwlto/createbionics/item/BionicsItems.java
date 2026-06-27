@@ -48,6 +48,7 @@ public class BionicsItems {
             REGISTRATE.item("waltz_2_music_disc", properties -> new RecordItem(15, BionicsSounds.WALTZ_2, properties, 227 * 20))
                     .properties(properties -> properties.stacksTo(1).rarity(Rarity.RARE))
                     .tag(ItemTags.MUSIC_DISCS)
+                    .lang("Music Disc")
                     .register();
 
     public static void register() {}

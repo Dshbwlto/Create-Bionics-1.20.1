@@ -8,6 +8,7 @@ import net.createmod.catnip.lang.FontHelper;
 import net.dshbwlto.createbionics.entity.BionicsEntities;
 import net.dshbwlto.createbionics.entity.client.anole.AnoleRenderer;
 import net.dshbwlto.createbionics.item.BionicsItems;
+import net.dshbwlto.createbionics.item.BionicsPaintings;
 import net.dshbwlto.createbionics.registry.custom.BionicsRegistrate;
 import net.dshbwlto.createbionics.sound.BionicsSounds;
 import net.minecraft.client.Minecraft;
@@ -84,6 +85,7 @@ public class CreateBionics {
         BionicsItems.register();
         BionicsEntities.register(modEventBus);
         BionicsSounds.register(modEventBus);
+        BionicsPaintings.PAINTINGS.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
 
