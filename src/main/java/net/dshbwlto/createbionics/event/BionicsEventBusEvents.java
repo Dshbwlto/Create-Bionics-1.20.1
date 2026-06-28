@@ -18,7 +18,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber(modid = CreateBionics.MOD_ID)
+@Mod.EventBusSubscriber(modid = CreateBionics.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class BionicsEventBusEvents {
 
     @SubscribeEvent
@@ -28,40 +28,4 @@ public class BionicsEventBusEvents {
         //event.put(BionicsEntities.REPLETE.get(), RepleteEntity.createAttributes().build());
     }
 
-
-    @SubscribeEvent
-    public static void scareEntity(EntityJoinLevelEvent event) {
-        if (event.getEntity() instanceof Spider spider) {
-            spider.goalSelector.addGoal(1, new AvoidEntityGoal(spider, Player.class, 6.0F, (double)1.0F, 1.2) {
-                @Override
-                public boolean canUse() {
-                    return super.canUse() && (toAvoid.getMainHandItem().is(BionicsItems.ANOLE.asItem()) || toAvoid.getOffhandItem().is(BionicsItems.ANOLE.asItem()));
-                }
-            });
-        }
-        if (event.getEntity() instanceof CaveSpider caveSpider) {
-            caveSpider.goalSelector.addGoal(1, new AvoidEntityGoal(caveSpider, Player.class, 6.0F, (double)1.0F, 1.2) {
-                @Override
-                public boolean canUse() {
-                    return super.canUse() && (toAvoid.getMainHandItem().is(BionicsItems.ANOLE.asItem()) || toAvoid.getOffhandItem().is(BionicsItems.ANOLE.asItem()));
-                }
-            });
-        }
-        if (event.getEntity() instanceof Silverfish silverfish) {
-            silverfish.goalSelector.addGoal(1, new AvoidEntityGoal(silverfish, Player.class, 6.0F, (double)1.0F, 1.2) {
-                @Override
-                public boolean canUse() {
-                    return super.canUse() && (toAvoid.getMainHandItem().is(BionicsItems.ANOLE.asItem()) || toAvoid.getOffhandItem().is(BionicsItems.ANOLE.asItem()));
-                }
-            });
-        }
-        if (event.getEntity() instanceof Bee bee) {
-            bee.goalSelector.addGoal(1, new AvoidEntityGoal(bee, Player.class, 6.0F, (double)1.0F, 1.2) {
-                @Override
-                public boolean canUse() {
-                    return super.canUse() && (toAvoid.getMainHandItem().is(BionicsItems.ANOLE.asItem()) || toAvoid.getOffhandItem().is(BionicsItems.ANOLE.asItem()));
-                }
-            });
-        }
-    }
 }

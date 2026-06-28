@@ -2,6 +2,7 @@ package net.dshbwlto.createbionics.entity.custom;
 
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllSoundEvents;
+import net.dshbwlto.createbionics.CreateBionics;
 import net.dshbwlto.createbionics.entity.BionicsEntities;
 import net.dshbwlto.createbionics.entity.api.AbstractRobot;
 import net.dshbwlto.createbionics.entity.client.anole.AnoleMarkings;
@@ -43,7 +44,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-@Mod.EventBusSubscriber
 public class AnoleEntity extends AbstractRobot {
     public boolean climbing = false;
 
@@ -101,22 +101,7 @@ public class AnoleEntity extends AbstractRobot {
         });
     }
 
-    @SubscribeEvent
-    public static void scareEntity(EntityJoinLevelEvent event) {
-        if (event.getEntity() instanceof Spider spider) {
-            spider.goalSelector.addGoal(1, new AvoidEntityGoal(spider, AnoleEntity.class, 6.0F, (double)1.0F, 1.2));
-        }
-        if (event.getEntity() instanceof CaveSpider caveSpider) {
-            caveSpider.goalSelector.addGoal(1, new AvoidEntityGoal(caveSpider, AnoleEntity.class, 6.0F, (double)1.0F, 1.2));
-        }
-        if (event.getEntity() instanceof Silverfish silverfish) {
-            silverfish.goalSelector.addGoal(1, new AvoidEntityGoal(silverfish, AnoleEntity.class, 6.0F, (double)1.0F, 1.2));
-        }
-        if (event.getEntity() instanceof Bee bee) {
-            bee.goalSelector.addGoal(1, new AvoidEntityGoal(bee, AnoleEntity.class, 6.0F, (double)1.0F, 1.2));;
-        }
-    }
-
+    @Override
     protected PathNavigation createNavigation(Level level) {
         return new WallClimberNavigation(this, level);
     }
@@ -155,6 +140,11 @@ public class AnoleEntity extends AbstractRobot {
             this.level().addParticle(ParticleTypes.SMOKE, this.getRandomX(0.5F), this.getRandomY(), this.getRandomZ(0.5F), 0.0F, 0.0F, 0.0F);
         }
         super.aiStep();
+    }
+
+    @Override
+    protected int calculateFallDamage(float pFallDistance, float pDamageMultiplier) {
+        return 0;
     }
 
     @Override
@@ -222,10 +212,10 @@ public class AnoleEntity extends AbstractRobot {
                 return InteractionResult.SUCCESS;
             } else {
                 super.tame(player);
+                setCommand(1);
                 this.navigation.recomputePath();
                 this.setTarget(null);
                 this.level().broadcastEntityEvent(this, (byte) 7);
-
                 return InteractionResult.SUCCESS;
             }
         }
@@ -247,10 +237,14 @@ public class AnoleEntity extends AbstractRobot {
                     || itemStack.is(Items.GOLD_INGOT)
                     || itemStack.is(Items.DIAMOND)
                     || itemStack.is(Items.BRUSH)) {
-                dropMaterial(getMarkings());
-                setTypeMarking(itemStack);
-                if (!itemStack.is(Items.BRUSH)) {
-                    itemStack.shrink(1);
+                if (level().isClientSide) {
+                    return InteractionResult.SUCCESS;
+                } else {
+                    dropMaterial(getMarkings());
+                    setTypeMarking(itemStack);
+                    if (!itemStack.is(Items.BRUSH)) {
+                        itemStack.shrink(1);
+                    }
                 }
             } else if (itemStack.is(AllItems.WRENCH.asItem())) {
                 if (getVariant() != AnoleVariant.COPPPER
