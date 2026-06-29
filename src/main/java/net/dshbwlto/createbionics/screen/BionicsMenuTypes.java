@@ -17,5 +17,11 @@ public class BionicsMenuTypes {
     public static final DeferredRegister<MenuType<?>> MENUS =
             DeferredRegister.create(ForgeRegistries.MENU_TYPES, CreateBionics.MOD_ID);
 
-    public static final RegistryObject<MenuType<OxhaulerMenu>> OXHAULER_MENU = MENUS.register("oxhauler_menu", () -> new MenuType<OxhaulerMenu>(OxhaulerMenu::new, FeatureFlags.DEFAULT_FLAGS));
+    public static final RegistryObject<MenuType<OxhaulerMenu>> OXHAULER_MENU =
+            registerMenuType("oxhauler_menu", OxhaulerMenu::create);
+
+    private static <T extends AbstractContainerMenu>RegistryObject<MenuType<T>> registerMenuType(String name,
+                                                                                                              IContainerFactory<T> factory) {
+        return MENUS.register(name, () -> IMenuTypeExtension.create(factory));
+    }
 }

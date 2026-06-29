@@ -96,7 +96,7 @@ public class OxhaulerScreen  extends AbstractContainerScreen<OxhaulerMenu> {
             pGuiGraphics.blit(GUI_TEXTURE_6, x-32, y-33, 0, 0, 218, 236);
         }
 
-        InventoryScreen.renderEntityInInventoryFollowsMouse(pGuiGraphics, x -16, y, 16, y + 52, 15, this. oxhauler);
+        InventoryScreen.renderEntityInInventoryFollowsMouse(pGuiGraphics, x + 51, y + 60, 17, (float)(x + 51) - this.xMouse, (float)(y + 75 - 50) - this.yMouse, this.oxhauler);
     }
 
     @Override

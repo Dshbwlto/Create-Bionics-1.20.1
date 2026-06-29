@@ -34,15 +34,11 @@ public class OxhaulerMenu extends RecipeBookMenu {
     private final Player player;
     private final ContainerLevelAccess access;
 
-    public OxhaulerMenu(int i, Inventory inventory) {
-        this (i, inventory, new SimpleContainer(200), new OxhaulerEntity(BionicsEntities.OXHAULER.get(), inventory.player.level()));
-    }
-
     // With Help from https://github.com/Mrbysco/ChocoCraft4/tree/arch/1.21
     // Under MIT LICENSE
 
-    public static OxhaulerMenu create(int i, Inventory inventory, FriendlyByteBuf registryFriendlyByteBuf) {
-        UUID uuid = registryFriendlyByteBuf.readUUID();
+    public static OxhaulerMenu create(int i, Inventory inventory, FriendlyByteBuf friendlyByteBuf) {
+        UUID uuid = friendlyByteBuf.readUUID();
         List<OxhaulerEntity> turtles = inventory.player.level().getEntitiesOfClass(OxhaulerEntity.class,
                 inventory.player.getBoundingBox().inflate(16), test -> test.getUUID().equals(uuid));
         OxhaulerEntity oxhaulerEntity = turtles.isEmpty() ? null : turtles.get(1);
