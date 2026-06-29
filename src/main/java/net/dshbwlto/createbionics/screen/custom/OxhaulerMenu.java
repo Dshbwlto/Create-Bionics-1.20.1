@@ -1,8 +1,10 @@
 
 package net.dshbwlto.createbionics.screen.custom;
 
+import net.dshbwlto.createbionics.entity.BionicsEntities;
 import net.dshbwlto.createbionics.entity.custom.OxhaulerEntity;
 import net.dshbwlto.createbionics.screen.BionicsMenuTypes;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
@@ -32,15 +34,18 @@ public class OxhaulerMenu extends RecipeBookMenu {
     private final Player player;
     private final ContainerLevelAccess access;
 
+    public OxhaulerMenu(int i, Inventory inventory) {
+        this (i, inventory, new SimpleContainer(200), new OxhaulerEntity(BionicsEntities.OXHAULER.get(), inventory.player.level()));
+    }
 
     // With Help from https://github.com/Mrbysco/ChocoCraft4/tree/arch/1.21
     // Under MIT LICENSE
 
-    public static OxhaulerMenu create(int i, Inventory inventory, RegistryFriendlyByteBuf registryFriendlyByteBuf) {
+    public static OxhaulerMenu create(int i, Inventory inventory, FriendlyByteBuf registryFriendlyByteBuf) {
         UUID uuid = registryFriendlyByteBuf.readUUID();
         List<OxhaulerEntity> turtles = inventory.player.level().getEntitiesOfClass(OxhaulerEntity.class,
                 inventory.player.getBoundingBox().inflate(16), test -> test.getUUID().equals(uuid));
-        OxhaulerEntity oxhaulerEntity = turtles.isEmpty() ? null : turtles.getFirst();
+        OxhaulerEntity oxhaulerEntity = turtles.isEmpty() ? null : turtles.get(1);
         return new OxhaulerMenu(i, inventory, new SimpleContainer(200), oxhaulerEntity);
     }
 
@@ -136,29 +141,27 @@ public class OxhaulerMenu extends RecipeBookMenu {
 
     }
 
-    protected static void slotChangedCraftingGrid(AbstractContainerMenu menu, Level level, Player player, CraftingContainer craftSlots, ResultContainer resultSlots, @Nullable RecipeHolder<CraftingRecipe> recipe) {
-        if (!level.isClientSide) {
-            CraftingInput craftinginput = craftSlots.asCraftInput();
-            ServerPlayer serverplayer = (ServerPlayer) player;
+    protected static void slotChangedCraftingGrid(AbstractContainerMenu pMenu, Level pLevel, Player pPlayer, CraftingContainer pContainer, ResultContainer pResult) {
+        if (!pLevel.isClientSide) {
+            ServerPlayer serverplayer = (ServerPlayer)pPlayer;
             ItemStack itemstack = ItemStack.EMPTY;
-            Optional<RecipeHolder<CraftingRecipe>> optional = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftinginput, level, recipe);
+            Optional<CraftingRecipe> optional = pLevel.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, pContainer, pLevel);
             if (optional.isPresent()) {
-                RecipeHolder<CraftingRecipe> recipeholder = (RecipeHolder) optional.get();
-                CraftingRecipe craftingrecipe = (CraftingRecipe) recipeholder.value();
-                if (resultSlots.setRecipeUsed(level, serverplayer, recipeholder)) {
-                    ItemStack itemstack1 = craftingrecipe.assemble(craftinginput, level.registryAccess());
-                    if (itemstack1.isItemEnabled(level.enabledFeatures())) {
+                CraftingRecipe craftingrecipe = optional.get();
+                if (pResult.setRecipeUsed(pLevel, serverplayer, craftingrecipe)) {
+                    ItemStack itemstack1 = craftingrecipe.assemble(pContainer, pLevel.registryAccess());
+                    if (itemstack1.isItemEnabled(pLevel.enabledFeatures())) {
                         itemstack = itemstack1;
                     }
                 }
             }
 
-            resultSlots.setItem(0, itemstack);
-            menu.setRemoteSlot(0, itemstack);
-            serverplayer.connection.send(new ClientboundContainerSetSlotPacket(menu.containerId, menu.incrementStateId(), 0, itemstack));
+            pResult.setItem(0, itemstack);
+            pMenu.setRemoteSlot(0, itemstack);
+            serverplayer.connection.send(new ClientboundContainerSetSlotPacket(pMenu.containerId, pMenu.incrementStateId(), 0, itemstack));
         }
-
     }
+
 
     public void fillCraftSlotsStackedContents(StackedContents itemHelper) {
         this.craftSlots.fillStackedContents(itemHelper);
@@ -206,7 +209,7 @@ public class OxhaulerMenu extends RecipeBookMenu {
 
     public void slotsChanged(Container inventory) {
         if (!this.placingRecipe) {
-            this.access.execute((p_344363_, p_344364_) -> slotChangedCraftingGrid(this, p_344363_, this.player, this.craftSlots, this.resultSlots, (RecipeHolder) null));
+            this.access.execute((p_344363_, p_344364_) -> slotChangedCraftingGrid(this, p_344363_, this.player, this.craftSlots, this.resultSlots));
         }
 
     }
@@ -215,8 +218,7 @@ public class OxhaulerMenu extends RecipeBookMenu {
     public boolean stillValid(Player player) {
         return !this.oxhauler.hasInventoryChanged(this.oxhaulerContainer)
                 && this.oxhaulerContainer.stillValid(player)
-                && this.oxhauler.isAlive()
-                && player.canInteractWithEntity(this.oxhauler, 4.0);
+                && this.oxhauler.isAlive();
     }
 
     @Override

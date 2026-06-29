@@ -7,11 +7,15 @@ import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.lang.FontHelper;
 import net.dshbwlto.createbionics.entity.BionicsEntities;
 import net.dshbwlto.createbionics.entity.client.anole.AnoleRenderer;
+import net.dshbwlto.createbionics.entity.client.oxhauler.OxhaulerRenderer;
 import net.dshbwlto.createbionics.item.BionicsItems;
 import net.dshbwlto.createbionics.item.BionicsPaintings;
 import net.dshbwlto.createbionics.registry.custom.BionicsRegistrate;
+import net.dshbwlto.createbionics.screen.BionicsMenuTypes;
+import net.dshbwlto.createbionics.screen.custom.OxhaulerScreen;
 import net.dshbwlto.createbionics.sound.BionicsSounds;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -83,9 +87,10 @@ public class CreateBionics {
         CREATIVE_MODE_TABS.register(modEventBus);
 
         BionicsItems.register();
-        BionicsEntities.register(modEventBus);
         BionicsSounds.register(modEventBus);
         BionicsPaintings.PAINTINGS.register(modEventBus);
+        BionicsEntities.register(modEventBus);
+        BionicsMenuTypes.MENUS.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
 
@@ -122,6 +127,10 @@ public class CreateBionics {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             EntityRenderers.register(BionicsEntities.ANOLE.get(), AnoleRenderer::new);
+            EntityRenderers.register(BionicsEntities.OXHAULER.get(), OxhaulerRenderer::new);
+
+            MenuScreens.register(BionicsMenuTypes.OXHAULER_MENU.get(), OxhaulerScreen::new);
         }
     }
+
 }

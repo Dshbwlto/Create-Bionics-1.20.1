@@ -96,7 +96,7 @@ public class OxhaulerScreen  extends AbstractContainerScreen<OxhaulerMenu> {
             pGuiGraphics.blit(GUI_TEXTURE_6, x-32, y-33, 0, 0, 218, 236);
         }
 
-        InventoryScreen.renderEntityInInventoryFollowsMouse(pGuiGraphics, x -16, y, x + 36, y + 52, 15, this. oxhauler);
+        InventoryScreen.renderEntityInInventoryFollowsMouse(pGuiGraphics, x -16, y, 16, y + 52, 15, this. oxhauler);
     }
 
     @Override
@@ -120,10 +120,6 @@ public class OxhaulerScreen  extends AbstractContainerScreen<OxhaulerMenu> {
     abstract static class OxhaulerScreenButton extends AbstractButton implements OxhaulerButton {
         private boolean selected;
 
-        protected OxhaulerScreenButton(int x, int y) {
-            super(x, y, 13, 13, CommonComponents.EMPTY);
-        }
-
         protected OxhaulerScreenButton(int x, int y, Component message) {
             super(x, y, 13, 13, message);
         }
@@ -140,7 +136,7 @@ public class OxhaulerScreen  extends AbstractContainerScreen<OxhaulerMenu> {
                 resourcelocation = OxhaulerScreen.BUTTON_SPRITE;
             }
 
-            guiGraphics.blit(resourcelocation, this.getX(), this.getY(), this.width, this.height, 0, 0);
+            guiGraphics.blit(resourcelocation, this.getX(), this.getY(), this.width, this.height, 13, 13);
             this.renderIcon(guiGraphics);
         }
 
@@ -169,7 +165,7 @@ public class OxhaulerScreen  extends AbstractContainerScreen<OxhaulerMenu> {
         }
 
         protected void renderIcon(GuiGraphics guiGraphics) {
-            guiGraphics.blit(this.sprite, this.getX(), this.getY(), 13, 13, 0, 0);
+            guiGraphics.blit(this.sprite, this.getX(), this.getY(), 13, 13, 13, 13);
         }
     }
 

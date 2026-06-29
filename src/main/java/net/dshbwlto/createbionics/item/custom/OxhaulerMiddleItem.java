@@ -7,10 +7,13 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraftforge.common.ForgeSpawnEggItem;
 
-public class OxhaulerMiddleItem extends SpawnEggItem {
+import java.util.function.Supplier;
 
-    public OxhaulerMiddleItem(EntityType<? extends Mob> defaultType, int backgroundColor, int highlightColor, Properties properties) {
+public class OxhaulerMiddleItem extends ForgeSpawnEggItem {
+
+    public OxhaulerMiddleItem(Supplier<? extends EntityType<? extends Mob>> defaultType, int backgroundColor, int highlightColor, Properties properties) {
         super(defaultType, backgroundColor, highlightColor, properties);
     }
 

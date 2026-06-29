@@ -8,6 +8,7 @@ import net.createmod.catnip.math.VecHelper;
 import net.dshbwlto.createbionics.entity.client.oxhauler.OxhaulerColor;
 import net.dshbwlto.createbionics.entity.client.oxhauler.OxhaulerVariant;
 import net.dshbwlto.createbionics.item.BionicsItems;
+import net.dshbwlto.createbionics.screen.custom.OxhaulerMenu;
 import net.dshbwlto.createbionics.sound.BionicsSounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -115,6 +116,7 @@ public class OxhaulerEntity extends AbstractHorse {
             SynchedEntityData.defineId(OxhaulerEntity.class, EntityDataSerializers.INT);
     public static final EntityDataAccessor<Boolean> CREATIVE_BLAZE_CAKE =
             SynchedEntityData.defineId(OxhaulerEntity.class, EntityDataSerializers.BOOLEAN);
+
     public boolean hasBlazeCake() {
         return entityData.get(CREATIVE_BLAZE_CAKE);
     }
@@ -122,15 +124,18 @@ public class OxhaulerEntity extends AbstractHorse {
     public int getFuel() {
         return entityData.get(FUEL);
     }
+
     public void setFuel(int fuel) {
         entityData.set(FUEL, fuel);
     }
 
     public static final EntityDataAccessor<Integer> ASSEMBLY =
             SynchedEntityData.defineId(OxhaulerEntity.class, EntityDataSerializers.INT);
+
     public int getAssembly() {
         return this.entityData.get(ASSEMBLY);
     }
+
     public void setAssembly(int assembly) {
         this.entityData.set(ASSEMBLY, assembly);
     }
@@ -413,7 +418,7 @@ public class OxhaulerEntity extends AbstractHorse {
             } else if (isHarvester()) {
                 entityData.set(HARVESTER, false);
                 spawnAtLocation(new ItemStack(AllBlocks.MECHANICAL_HARVESTER));
-            } else if (getVariant() != OxhaulerVariant.BRASS){
+            } else if (getVariant() != OxhaulerVariant.BRASS) {
                 dropIngot();
                 setVariant(OxhaulerVariant.BRASS);
             } else if (getAssembly() > 0) {
@@ -444,7 +449,7 @@ public class OxhaulerEntity extends AbstractHorse {
                 itemStack.shrink(1);
             }
         } else if (getFuel() > 0) {
-            if (player.isShiftKeyDown()){
+            if (player.isShiftKeyDown()) {
                 openCustomInventoryScreen(player);
             } else {
                 doPlayerRide(player);
@@ -490,7 +495,7 @@ public class OxhaulerEntity extends AbstractHorse {
             ItemStack itemstack = this.inventory.getItem(x);
             if (!itemstack.isEmpty()) {
                 CompoundTag compoundtag = new CompoundTag();
-                compoundtag.putByte("Slot", (byte)(x));
+                compoundtag.putByte("Slot", (byte) (x));
                 listtag.add(itemstack.save(compoundtag));
             }
         }
@@ -535,10 +540,10 @@ public class OxhaulerEntity extends AbstractHorse {
     public void playSoundScape(int radius, int height) {
         for (int j = 0; j <= height; j++) {
             for (int i = -radius; i <= radius; i++) {
-                SoundScapes.play(SoundScapes.AmbienceGroup.COG, getOnPos().east(i).north(-i).above(j), (float)(1 / radius) * 10);
-                SoundScapes.play(SoundScapes.AmbienceGroup.KINETIC, getOnPos().east(i).north(-i).above(j), (float)(1 / radius) * 10);
-                SoundScapes.play(SoundScapes.AmbienceGroup.COG, getOnPos().north(i).east(-i).above(j), (float)(1 / radius) * 10);
-                SoundScapes.play(SoundScapes.AmbienceGroup.KINETIC, getOnPos().north(i).east(-i).above(j), (float)(1 / radius) * 10);
+                SoundScapes.play(SoundScapes.AmbienceGroup.COG, getOnPos().east(i).north(-i).above(j), (float) (1 / radius) * 10);
+                SoundScapes.play(SoundScapes.AmbienceGroup.KINETIC, getOnPos().east(i).north(-i).above(j), (float) (1 / radius) * 10);
+                SoundScapes.play(SoundScapes.AmbienceGroup.COG, getOnPos().north(i).east(-i).above(j), (float) (1 / radius) * 10);
+                SoundScapes.play(SoundScapes.AmbienceGroup.KINETIC, getOnPos().north(i).east(-i).above(j), (float) (1 / radius) * 10);
             }
         }
     }
@@ -551,6 +556,7 @@ public class OxhaulerEntity extends AbstractHorse {
             spawnAtLocation(new ItemStack(AllItems.ANDESITE_ALLOY.asItem()));
         }
     }
+
     private void setTypeVariant(ItemStack itemStack) {
         if (itemStack.getItem() == Items.COPPER_INGOT && getVariant() != OxhaulerVariant.COPPER) {
             setVariant(OxhaulerVariant.COPPER);
@@ -562,9 +568,11 @@ public class OxhaulerEntity extends AbstractHorse {
             setVariant(OxhaulerVariant.BRASS);
         }
     }
+
     private int getTypeVariant() {
         return this.entityData.get(VARIANT);
     }
+
     public int getTypeColor() {
         return this.entityData.get(COLOR);
     }
@@ -572,6 +580,7 @@ public class OxhaulerEntity extends AbstractHorse {
     public OxhaulerVariant getVariant() {
         return OxhaulerVariant.byId(this.getTypeVariant() & 255);
     }
+
     public OxhaulerColor getColor() {
         return OxhaulerColor.byId(this.getTypeColor() & 255);
     }
@@ -579,6 +588,7 @@ public class OxhaulerEntity extends AbstractHorse {
     public void setVariant(OxhaulerVariant variant) {
         this.entityData.set(VARIANT, variant.getId() & 255);
     }
+
     public void setColor(OxhaulerColor color) {
         this.entityData.set(COLOR, color.getId() & 255);
     }
@@ -586,6 +596,7 @@ public class OxhaulerEntity extends AbstractHorse {
     public boolean isHarvester() {
         return this.entityData.get(HARVESTER);
     }
+
     public boolean isPlough() {
         return this.entityData.get(PLOUGH);
     }
@@ -606,6 +617,17 @@ public class OxhaulerEntity extends AbstractHorse {
         }
     }
 
+    @Override
+    public void positionRider(Entity passenger, Entity.MoveFunction moveFunc) {
+        float angle = (0.0174532925F * this.yBodyRot);
+
+        double extraX = Mth.sin(Mth.PI + angle) / -2.5;
+        double extraZ = Mth.cos(angle) / -2.5;
+
+        passenger.setPos(this.getX() + extraX, this.getY() + this.getPassengersRidingOffset(), this.getZ() + extraZ);
+    }
+
+
     //ASSEMBLY//
     private Item getPart() {
         if (getAssembly() == 0) {
@@ -623,7 +645,6 @@ public class OxhaulerEntity extends AbstractHorse {
     public void containerChanged(Container container) {
 
     }
-
     @Override
     public void openCustomInventoryScreen(Player player) {
         if (!this.level().isClientSide && (!this.isVehicle() || this.hasPassenger(player))) {
@@ -633,9 +654,7 @@ public class OxhaulerEntity extends AbstractHorse {
             }
 
             serverPlayer.openMenu(new SimpleMenuProvider((ix, playerInventory, playerEntityx) ->
-                    new OxhaulerMenu(ix, playerInventory, this.inventory, this), this.getDisplayName()), buf -> {
-                buf.writeUUID(getUUID());
-            });
+                    new OxhaulerMenu(ix, playerInventory, this.inventory, this), this.getDisplayName()));
         }
     }
 
@@ -656,7 +675,6 @@ public class OxhaulerEntity extends AbstractHorse {
         this.inventory.addListener(this);
     }
 
-    @Override
     public Container getInventory() {
         return this.inventory;
     }

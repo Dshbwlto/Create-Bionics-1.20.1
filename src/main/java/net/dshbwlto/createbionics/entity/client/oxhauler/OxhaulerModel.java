@@ -12,8 +12,7 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 
-public class OxhaulerModel <T extends OxhaulerEntity> extends  HierarchicalModel<T>
-{
+public class OxhaulerModel <T extends OxhaulerEntity> extends  HierarchicalModel<T> {
     private final ModelPart root;
     private final ModelPart back_master;
     private final ModelPart front_master;
@@ -406,9 +405,8 @@ public class OxhaulerModel <T extends OxhaulerEntity> extends  HierarchicalModel
         this.pistons.yRot = pNetHeadYaw * ((float)Math.PI / 180F);
         this.pistons.xRot = pHeadPitch * ((float)Math.PI / 180F) + (-10 * (Mth.PI / 180));
     }
-
     @Override
-    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float pRed, float pGreen, float pBlue, float pAlpha) {
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         root.render(poseStack, vertexConsumer, packedLight, packedOverlay);
     }
 
@@ -416,5 +414,4 @@ public class OxhaulerModel <T extends OxhaulerEntity> extends  HierarchicalModel
     public ModelPart root() {
         return root;
     }
-
 }

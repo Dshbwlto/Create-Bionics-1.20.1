@@ -19,10 +19,11 @@ public class BionicsEntities {
             ENTITIES.register("anole", () -> EntityType.Builder.of(AnoleEntity::new, MobCategory.CREATURE)
                     .sized(0.5f, 0.25f).build("anole"));
 
-    /*
     public static final Supplier<EntityType<OxhaulerEntity>> OXHAULER =
             ENTITIES.register("oxhauler", () -> EntityType.Builder.of(OxhaulerEntity::new, MobCategory.CREATURE)
                     .sized(2f, 2f).build("oxhauler"));
+
+    /*
     public static final Supplier<EntityType<RepleteEntity>> REPLETE =
             ENTITIES.register("replete", () -> EntityType.Builder.of(RepleteEntity::new, MobCategory.CREATURE)
                     .sized(4f, 5f).build("replete"));

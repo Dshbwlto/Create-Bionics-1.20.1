@@ -5,6 +5,7 @@ import net.dshbwlto.createbionics.entity.BionicsEntities;
 import net.dshbwlto.createbionics.entity.client.BionicsModelLayers;
 import net.dshbwlto.createbionics.entity.client.anole.AnoleModel;
 import net.dshbwlto.createbionics.entity.custom.AnoleEntity;
+import net.dshbwlto.createbionics.entity.custom.OxhaulerEntity;
 import net.dshbwlto.createbionics.item.BionicsItems;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.animal.Bee;
@@ -24,7 +25,7 @@ public class BionicsEventBusEvents {
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event) {
         event.put(BionicsEntities.ANOLE.get(), AnoleEntity.createAttributes().build());
-        //event.put(BionicsEntities.OXHAULER.get(), OxhaulerEntity.createAttributes().build());
+        event.put(BionicsEntities.OXHAULER.get(), OxhaulerEntity.createAttributes().build());
         //event.put(BionicsEntities.REPLETE.get(), RepleteEntity.createAttributes().build());
     }
 
